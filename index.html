@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>將軍澳培智學校 - 電腦科：儲存檔案教學遊戲</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --bg-main: #f0f9ff;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --cny-red: #cc0000;
+            --cny-gold: #ffcc00;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "MicroSoft YaHei", "PingFang TC", "Helvetica Neue", sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            width: 100%;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            text-align: center;
+            padding: 0.6rem 1rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+        }
+
+        header .logo {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.15);
+            flex-shrink: 0;
+        }
+
+        header .titles { text-align: left; }
+        header h1 {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            font-weight: 400;
+            margin-bottom: 0.1rem;
+        }
+        header h2 {
+            font-size: 1.55rem;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .main-container {
+            width: 96%;
+            max-width: 1024px;
+            height: calc(100dvh - 110px);
+            max-height: 768px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            padding: 0.4rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.2rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border: 4px solid #e2e8f0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+            background: #fff;
+            padding: 0.5rem 0.9rem;
+            border-radius: 15px;
+            margin-bottom: 0.6rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 2px solid #cbd5e1;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+
+        .stars-container { font-size: 1.4rem; color: #f59e0b; }
+        .current-tier-display {
+            font-size: 1rem;
+            font-weight: bold;
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 0.35rem 0.7rem;
+            border-radius: 10px;
+        }
+
+        .tier-selection { text-align: center; justify-content: center; gap: 1rem; }
+        .tier-selection h3 { font-size: 1.8rem; color: var(--primary); }
+        .tier-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
+        }
+        .btn-tier {
+            background: white;
+            border: 4px solid var(--primary);
+            border-radius: 16px;
+            padding: 1.2rem 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 130px;
+            justify-content: center;
+        }
+        .btn-tier:hover, .btn-tier:active {
+            transform: translateY(-3px);
+            background: #e0e7ff;
+            box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+        }
+        .btn-tier .tier-title { font-size: 1.35rem; font-weight: bold; color: var(--primary); }
+        .btn-tier .tier-desc { font-size: 0.98rem; color: #475569; line-height: 1.35; }
+        .badge {
+            background: var(--warning);
+            color: white;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .module-panel { display: none; height: 100%; }
+        .module-panel.active {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow: auto;
+        }
+
+        .instruction-box {
+            background: #eff6ff;
+            border-left: 6px solid var(--primary);
+            padding: 0.7rem 1rem;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 0.6rem;
+            font-size: 1.15rem;
+            color: #1e40af;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .poster-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.7rem;
+            flex: 1;
+        }
+        .poster-canvas {
+            width: 100%;
+            max-width: 480px;
+            height: 250px;
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            border: 6px solid var(--cny-gold);
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.9rem;
+            color: var(--cny-gold);
+        }
+        .poster-header {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+            border-bottom: 2px solid var(--cny-gold);
+            padding-bottom: 0.25rem;
+            width: 100%;
+            text-align: center;
+        }
+        .poster-items-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 100px;
+        }
+        .placed-item {
+            font-size: 2.6rem;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+        .sticker-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            background: #f1f5f9;
+            padding: 0.7rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 520px;
+        }
+        .sticker-btn {
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: white;
+            border: 3px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 0.45rem 0.7rem;
+            cursor: pointer;
+            min-width: 48px;
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+        .sticker-btn:active, .sticker-btn:hover {
+            transform: scale(1.06);
+            border-color: var(--primary);
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.15rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            min-height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-action:active, .btn-action:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        .btn-action.sec { background: #64748b; }
+        .btn-action.sec:hover { background: #475569; }
+        .btn-action.ok { background: #16a34a; }
+        .btn-action.ok:hover { background: #15803d; }
+        .btn-action.gold { background: linear-gradient(135deg, #d97706, #f59e0b); }
+
+        .sim-window {
+            background: #ffffff;
+            border: 3px solid #475569;
+            border-radius: 12px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+            margin-top: 0.2rem;
+            position: relative;
+            z-index: 100;
+            width: 100%;
+            flex-shrink: 0;
+        }
+        .sim-titlebar {
+            background: #2563eb;
+            color: white;
+            padding: 0.55rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.05rem;
+            border-top-left-radius: 9px;
+            border-top-right-radius: 9px;
+        }
+        .sim-menu {
+            background: #f1f5f9;
+            padding: 0.25rem 0.8rem;
+            display: flex;
+            gap: 0.4rem;
+            border-bottom: 2px solid #e2e8f0;
+            position: relative;
+            z-index: 500;
+        }
+        .menu-item-wrapper { position: relative; display: inline-block; }
+        .menu-item {
+            padding: 0.55rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #334155;
+            display: inline-block;
+            min-height: 48px;
+            line-height: 1.5;
+        }
+        .menu-item:hover, .menu-item:active, .menu-item.highlight {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            margin-top: 4px;
+            background: white;
+            border: 3px solid #1d4ed8;
+            box-shadow: 0 16px 32px rgba(0,0,0,0.3);
+            border-radius: 8px;
+            width: 280px;
+            z-index: 99999;
+            display: none;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-opt {
+            padding: 0.8rem 1rem;
+            cursor: pointer;
+            font-size: 1.08rem;
+            font-weight: bold;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 48px;
+        }
+        .dropdown-opt:last-child { border-bottom: none; }
+        .dropdown-opt:hover, .dropdown-opt:active, .dropdown-opt.highlight {
+            background: #2563eb;
+            color: white;
+        }
+
+        .save-dialog {
+            background: #f8fafc;
+            border: 3px solid #94a3b8;
+            border-radius: 12px;
+            padding: 1rem;
+            max-width: 560px;
+            margin: 0.8rem auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .dialog-row {
+            margin-bottom: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+        .dialog-row label {
+            font-size: 1.08rem;
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .choice-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.7rem;
+        }
+        .choice-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+        .choice-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.7rem 0.75rem;
+            border: 3px solid #cbd5e1;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            min-height: 56px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            text-align: left;
+            transition: 0.15s;
+        }
+        .choice-btn:hover, .choice-btn:active { border-color: var(--primary); background: #eff6ff; }
+        .choice-btn.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+            color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.2);
+        }
+        .choice-letter {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 50%;
+            background: #1e40af;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 900;
+            flex-shrink: 0;
+            box-shadow: 0 2px 0 #1e3a8a;
+        }
+        .choice-btn.selected .choice-letter { background: var(--primary); }
+
+        .input-filename {
+            width: 100%;
+            padding: 0.65rem 0.9rem;
+            font-size: 1.15rem;
+            border: 3px solid #cbd5e1;
+            border-radius: 10px;
+            outline: none;
+            font-weight: bold;
+            min-height: 48px;
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .input-filename:focus { border-color: var(--primary); }
+
+        .explorer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            padding: 0.7rem;
+        }
+        .file-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.7rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            text-align: center;
+            min-height: 90px;
+            position: relative;
+        }
+        .file-item:hover, .file-item:active, .file-item.selected {
+            background: #e0e7ff;
+            border-color: var(--primary);
+        }
+        .file-item .file-letter {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #1e40af;
+            color: #fff;
+            font-weight: 900;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .file-icon { font-size: 2.6rem; margin-bottom: 0.25rem; }
+        .file-name { font-size: 0.98rem; font-weight: bold; word-break: break-all; }
+
+        .feedback-banner {
+            display: none;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 0.6rem;
+            flex-shrink: 0;
+        }
+        .feedback-banner.success {
+            display: block;
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #34d399;
+        }
+        .feedback-banner.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #f87171;
+        }
+
+        .method-progress {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.6rem;
+            flex-wrap: wrap;
+        }
+        .method-chip {
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .method-chip.done { background: #d1fae5; color: #065f46; }
+        .method-chip.now { background: #dbeafe; color: #1d4ed8; box-shadow: 0 0 0 3px rgba(37,99,235,0.25); }
+
+        .showcase-card, .cert-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.5rem;
+        }
+        .showcase-card h3, .cert-card h2 {
+            color: var(--primary);
+            font-size: 1.7rem;
+        }
+        .showcase-meta, .cert-meta {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #334155;
+        }
+        .cert-medal { font-size: 4.2rem; line-height: 1; }
+        .cert-title { font-size: 1.9rem; font-weight: 900; color: #1e5a8a; }
+        .name-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            margin: 0.4rem 0;
+        }
+        .name-row input {
+            min-height: 48px;
+            border: 3px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 0.5rem 0.8rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            width: min(240px, 70vw);
+            user-select: text;
+            -webkit-user-select: text;
+        }
+        .hw-box {
+            margin-top: 0.6rem;
+            padding: 0.8rem;
+            border: 3px dashed #94a3b8;
+            border-radius: 12px;
+            background: #f8fafc;
+            width: 100%;
+            max-width: 520px;
+        }
+        .hw-box h4 { color: #1e40af; margin-bottom: 0.4rem; font-size: 1.1rem; }
+        .hw-words {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            justify-content: center;
+        }
+        .hw-word {
+            background: #e0e7ff;
+            color: #3730a3;
+            border: 2px solid #a5b4fc;
+            border-radius: 10px;
+            padding: 0.4rem 0.7rem;
+            font-weight: 900;
+            font-size: 1.05rem;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+        }
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            justify-content: center;
+            margin-top: 0.7rem;
+        }
+
+        footer {
+            width: 100%;
+            background: #0f172a;
+            color: #94a3b8;
+            text-align: center;
+            padding: 0.45rem;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .pulse-hint { animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(79, 70, 229, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0); }
+        }
+
+        /* print cert — A4 landscape; no visibility hacks on main UI */
+        #cert-print-root { display: none; }
+        @media print {
+            @page { size: A4 landscape; margin: 12mm; }
+            html, body {
+                background: #fff !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            body * { display: none !important; }
+            #cert-print-root, #cert-print-root * {
+                display: block !important;
+                visibility: visible !important;
+            }
+            #cert-print-root {
+                position: fixed;
+                left: 0; top: 0;
+                width: 100%; height: 100%;
+                padding: 18mm 16mm;
+                box-sizing: border-box;
+                text-align: center;
+                font-family: "PingFang HK", "Noto Sans TC", "MicroSoft YaHei", sans-serif;
+                color: #1a3a5c;
+            }
+            #cert-print-root img {
+                display: inline-block !important;
+                width: 72px; height: 72px;
+                object-fit: contain;
+                margin: 0 auto 8px;
+            }
+            #cert-print-root .medal { font-size: 64px; line-height: 1; margin: 6px 0; }
+            #cert-print-root .title { font-size: 36px; font-weight: 900; color: #1e5a8a; margin: 8px 0; }
+            #cert-print-root .meta { font-size: 22px; font-weight: 800; color: #3a6f96; margin: 6px 0; }
+        }
+
+        @media (max-width: 768px) {
+            .tier-buttons { grid-template-columns: 1fr; }
+            .choice-grid, .choice-grid.cols-3 { grid-template-columns: 1fr; }
+            header h2 { font-size: 1.25rem; }
+            .instruction-box { font-size: 1rem; }
+            .main-container { height: calc(100dvh - 120px); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img class="logo" src="assets/puichi-logo.png" alt="將軍澳培智學校" width="48" height="48"
+             onerror="this.style.display='none'">
+        <div class="titles">
+            <h1>將軍澳培智學校 · 電腦科互動學習</h1>
+            <h2>儲存檔案教學遊戲</h2>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="status-bar" id="statusBar" style="display:none;">
+            <div class="current-tier-display" id="tierDisplay">難度：初組</div>
+            <div class="stars-container" id="starsDisplay">☆☆☆</div>
+            <button class="btn-action sec" style="padding:0.3rem 0.75rem;font-size:0.92rem;min-height:40px;" onclick="resetToHome()">重新選擇組別</button>
+        </div>
+
+        <!-- STEP 0: Tier -->
+        <div class="card tier-selection" id="tierSelectCard">
+            <h3>請選擇學習組別</h3>
+            <div class="tier-buttons">
+                <div class="btn-tier" onclick="selectTier(1)">
+                    <span class="badge">初組</span>
+                    <span class="tier-title">數字檔案名</span>
+                    <span class="tier-desc">用數字作檔案名稱<br>目標：<b>2026</b></span>
+                </div>
+                <div class="btn-tier" onclick="selectTier(2)">
+                    <span class="badge" style="background:#059669;">中組</span>
+                    <span class="tier-title">英文字母檔案名</span>
+                    <span class="tier-desc">用英文字母作檔案名稱<br>目標：<b>CNY</b></span>
+                </div>
+                <div class="btn-tier" onclick="selectTier(3)">
+                    <span class="badge" style="background:#7c3aed;">高組</span>
+                    <span class="tier-title">英文詞檔案名</span>
+                    <span class="tier-desc">自行輸入／選擇英文詞<br>例如：Poster</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE 1: Design + Save -->
+        <div class="card module-panel" id="module1Panel">
+            <div class="instruction-box" id="m1Instruction">任務 1：為農曆新年海報加裝飾（至少 2 個）</div>
+
+            <div class="poster-wrapper" id="posterArea">
+                <div class="poster-canvas" id="posterCanvas">
+                    <div class="poster-header">農曆新年快樂</div>
+                    <div class="poster-items-area" id="placedStickers"></div>
+                    <div style="font-size:1.05rem;font-weight:bold;">恭喜發財 萬事如意</div>
+                </div>
+                <div class="sticker-selector" id="stickerSelector">
+                    <button class="sticker-btn" type="button" onclick="addSticker('🧧')">🧧 貼利是</button>
+                    <button class="sticker-btn" type="button" onclick="addSticker('🏮')">🏮 掛燈籠</button>
+                    <button class="sticker-btn" type="button" onclick="addSticker('🌸')">🌸 桃花開</button>
+                    <button class="sticker-btn" type="button" onclick="addSticker('🐉')">🐉 舞龍頭</button>
+                </div>
+                <button class="btn-action pulse-hint" id="btnGoToSave" type="button" style="display:none;" onclick="startSaveFlow()">
+                    海報完成！準備儲存檔案 💾
+                </button>
+            </div>
+
+            <div class="sim-window" id="saveSimWindow" style="display:none;">
+                <div class="sim-titlebar">
+                    <span>📄 文書處理軟件 - 新年海報</span>
+                    <span>×</span>
+                </div>
+                <div class="sim-menu">
+                    <div class="menu-item-wrapper">
+                        <div class="menu-item pulse-hint" id="menuFile" onclick="clickFileMenu()">檔案 (File)</div>
+                        <div class="dropdown-menu" id="fileDropdown">
+                            <div class="dropdown-opt">📄 開啓新檔</div>
+                            <div class="dropdown-opt pulse-hint" id="optSaveAs" onclick="clickSaveAs()">💾 另存新檔 (Save As)</div>
+                        </div>
+                    </div>
+                    <div class="menu-item">常用</div>
+                    <div class="menu-item">插入</div>
+                </div>
+                <div class="sim-body">
+                    <div class="save-dialog" id="saveDialog" style="display:none;">
+                        <h4 style="font-size:1.25rem;color:var(--primary);margin-bottom:0.7rem;">💾 另存新檔</h4>
+                        <div class="dialog-row">
+                            <label>1. 文書檔案格式是 docx。請選擇格式：</label>
+                            <div class="choice-grid" id="formatChoices">
+                                <button type="button" class="choice-btn selected" id="fmtDocx" onclick="selectFormat('docx', this)">
+                                    <span class="choice-letter">A</span>
+                                    <span>📄 文書檔案 (.docx)</span>
+                                </button>
+                                <button type="button" class="choice-btn" id="fmtTxt" onclick="selectFormat('txt', this)">
+                                    <span class="choice-letter">B</span>
+                                    <span>📝 純文字 (.txt)</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="dialog-row">
+                            <label id="filenameLabel">2. 請選擇／輸入檔案名稱：</label>
+                            <input type="text" id="filenameInput" class="input-filename" placeholder="點選下方 A/B/C…" readonly>
+                            <div class="choice-grid cols-3" id="keyboardContainer"></div>
+                        </div>
+                        <button class="btn-action" type="button" style="width:100%;margin-top:0.4rem;" onclick="confirmSave()">
+                            ✅ 確認儲存 (Save)
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="feedback-banner" id="m1Feedback"></div>
+        </div>
+
+        <!-- MODULE 2: Open both methods -->
+        <div class="card module-panel" id="module2Panel">
+            <div class="instruction-box" id="m2Instruction">任務 2：學習兩種開啟檔案方法</div>
+            <div class="method-progress" id="methodProgress">
+                <span class="method-chip" id="chipM1">方法一 檔案總管</span>
+                <span class="method-chip" id="chipM2">方法二 先開軟件</span>
+            </div>
+
+            <!-- Method 1 -->
+            <div id="method1Sim" style="display:none;margin-top:0.3rem;">
+                <div class="sim-window">
+                    <div class="sim-titlebar" style="background:#475569;">
+                        <span>📁 檔案總管 - 我的文件</span>
+                        <span>×</span>
+                    </div>
+                    <div class="sim-body">
+                        <p style="margin:0.5rem 0.8rem;font-size:1.02rem;color:#475569;font-weight:700;">
+                            提示：點擊剛才儲存的海報檔案開啟它。
+                        </p>
+                        <div class="explorer-grid" id="explorerGrid">
+                            <!-- filled by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Method 2 -->
+            <div id="method2Sim" style="display:none;margin-top:0.3rem;">
+                <div class="sim-window">
+                    <div class="sim-titlebar">
+                        <span>📄 文書處理軟件 (Word Processor)</span>
+                        <span>×</span>
+                    </div>
+                    <div class="sim-menu">
+                        <div class="menu-item-wrapper">
+                            <div class="menu-item pulse-hint" id="m2MenuFile" onclick="clickM2FileMenu()">檔案 (File)</div>
+                            <div class="dropdown-menu" id="m2FileDropdown">
+                                <div class="dropdown-opt">📄 開啓新檔</div>
+                                <div class="dropdown-opt pulse-hint" id="m2OptOpen" onclick="clickM2OpenOpt()">📂 開啟舊檔 (Open)</div>
+                            </div>
+                        </div>
+                        <div class="menu-item">常用</div>
+                    </div>
+                    <div class="sim-body" style="text-align:center;padding:1.2rem 0.8rem;">
+                        <p style="font-size:1.15rem;color:#64748b;font-weight:700;" id="m2AppStatus">請先點擊頂部的「檔案」選單…</p>
+                        <div class="save-dialog" id="m2OpenDialog" style="display:none;text-align:left;">
+                            <h4 style="font-size:1.15rem;color:var(--primary);margin-bottom:0.7rem;">📂 選擇要開啟的檔案</h4>
+                            <div class="explorer-grid" id="m2OpenGrid"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-banner" id="m2Feedback"></div>
+        </div>
+
+        <!-- Showcase before cert -->
+        <div class="card module-panel" id="showcasePanel">
+            <div class="showcase-card">
+                <h3>📢 展示你的檔案</h3>
+                <p class="showcase-meta" id="showcaseFileText">檔案名稱：—</p>
+                <p class="showcase-meta">請向老師簡單介紹你儲存的海報檔案</p>
+                <div style="display:flex;justify-content:center;margin:0.4rem 0;">
+                    <div class="poster-canvas" id="showcasePoster" style="transform:scale(0.82);transform-origin:center top;height:210px;"></div>
+                </div>
+                <div class="name-row">
+                    <label for="studentName" style="font-weight:800;">姓名（可選）</label>
+                    <input id="studentName" type="text" maxlength="20" placeholder="同學／花名">
+                </div>
+                <button class="btn-action gold pulse-hint" type="button" onclick="goToCert()">🌟 完成學習！領取證書</button>
+            </div>
+        </div>
+
+        <!-- Victory / Cert -->
+        <div class="card module-panel" id="victoryPanel">
+            <div class="cert-card">
+                <img src="assets/puichi-logo.png" alt="將軍澳培智學校" width="72" height="72"
+                     style="width:72px;height:72px;object-fit:contain;"
+                     onerror="this.style.display='none'">
+                <div class="cert-medal" id="endMedal">🥇</div>
+                <div class="cert-title" id="endTitle">金獎證書</div>
+                <div class="cert-meta" id="endName">同學</div>
+                <div class="cert-meta" id="endDetail">已掌握儲存與開啟檔案</div>
+                <div class="cert-meta">儲存檔案教學 · 將軍澳培智學校電腦科</div>
+                <div class="action-row no-print">
+                    <button class="btn-action" type="button" onclick="printCert()">列印證書</button>
+                    <button class="btn-action sec" type="button" onclick="resetToHome()">再玩一次</button>
+                </div>
+                <div class="hw-box no-print">
+                    <h4>課後練習 · 鍵盤字詞（中國相關）</h4>
+                    <div class="hw-words">
+                        <span class="hw-word">tea</span>
+                        <span class="hw-word">silk</span>
+                        <span class="hw-word">China</span>
+                        <span class="hw-word">Panda</span>
+                        <span class="hw-word">Macau</span>
+                    </div>
+                    <p style="margin-top:0.45rem;font-size:0.95rem;color:#64748b;font-weight:700;">
+                        用網上鍵盤訓練輸入以上字詞
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>©2026 程棨彥老師｜將軍澳培智學校電腦科 · saving-file-v2.1-pages</footer>
+    <div id="cert-print-root" aria-hidden="true"></div>
+
+    <script>
+    (function () {
+        'use strict';
+
+        // SEN locks
+        document.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+        document.addEventListener('selectstart', function (e) {
+            const t = e.target;
+            if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+            e.preventDefault();
+        });
+
+        const LETTERS = ['A', 'B', 'C', 'D'];
+
+        const tierConfigs = {
+            1: {
+                name: '初組 (數字檔名)',
+                target: '2026',
+                mode: 'exact',
+                options: ['2026', '123', '888'],
+                hint: '請選擇數字檔案名稱：2026'
+            },
+            2: {
+                name: '中組 (英文字母)',
+                target: 'CNY',
+                mode: 'exact',
+                options: ['CNY', 'A', 'HK'],
+                hint: '請選擇英文字母檔案名稱：CNY'
+            },
+            3: {
+                name: '高組 (英文詞)',
+                target: 'Poster',
+                mode: 'anyOptionOrCustom',
+                options: ['Poster', 'NewYear', 'Flower'],
+                hint: '請選擇或輸入英文詞作為檔案名稱'
+            }
+        };
+
+        let currentTier = 1;
+        let targetFilename = '2026';
+        let savedFilename = '';
+        let selectedFormat = 'docx';
+        let stickersCount = 0;
+        let openStep = 0; // 0 none, 1 method1, 2 method2 done path
+        let method1Done = false;
+        let method2Done = false;
+        let mistakeCount = 0;
+        let studentLabel = '同學';
+
+        // Audio
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioCtx();
+        }
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+                if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.05);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                    osc.start(now); osc.stop(now + 0.05);
+                } else if (type === 'success') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, now);
+                    osc.frequency.setValueAtTime(400, now + 0.1);
+                    osc.frequency.setValueAtTime(520, now + 0.2);
+                    osc.frequency.setValueAtTime(660, now + 0.3);
+                    gain.gain.setValueAtTime(0.28, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                    osc.start(now); osc.stop(now + 0.5);
+                } else if (type === 'error') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, now);
+                    osc.frequency.setValueAtTime(140, now + 0.12);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                    osc.start(now); osc.stop(now + 0.25);
+                }
+            } catch (_) { /* ignore */ }
+        }
+
+        function $(id) { return document.getElementById(id); }
+        function showPanel(id) {
+            ['tierSelectCard', 'module1Panel', 'module2Panel', 'showcasePanel', 'victoryPanel'].forEach(function (pid) {
+                const el = $(pid);
+                if (!el) return;
+                if (pid === 'tierSelectCard') {
+                    el.style.display = (pid === id) ? 'flex' : 'none';
+                } else {
+                    el.classList.toggle('active', pid === id);
+                }
+            });
+        }
+        function setStars(n) {
+            const full = '⭐'.repeat(Math.max(0, Math.min(3, n)));
+            const empty = '☆'.repeat(Math.max(0, 3 - n));
+            $('starsDisplay').textContent = full + empty;
+        }
+        function bumpMistake() { mistakeCount += 1; }
+        function medalFromMistakes() {
+            if (mistakeCount <= 0) return { medal: '🥇', title: '金獎證書', stars: 3 };
+            if (mistakeCount <= 2) return { medal: '🥈', title: '銀獎證書', stars: 2 };
+            return { medal: '🥉', title: '銅獎證書', stars: 1 };
+        }
+
+        function selectTier(tier) {
+            playSound('click');
+            currentTier = tier;
+            const config = tierConfigs[tier];
+            targetFilename = config.target;
+            mistakeCount = 0;
+            method1Done = false;
+            method2Done = false;
+            openStep = 0;
+            savedFilename = '';
+            selectedFormat = 'docx';
+            stickersCount = 0;
+
+            $('tierDisplay').textContent = '難度：' + config.name;
+            $('statusBar').style.display = 'flex';
+            setStars(0);
+            showPanel('module1Panel');
+            setupModule1();
+        }
+
+        function resetToHome() {
+            playSound('click');
+            location.reload();
+        }
+
+        function setupModule1() {
+            stickersCount = 0;
+            $('placedStickers').innerHTML = '';
+            $('btnGoToSave').style.display = 'none';
+            $('saveSimWindow').style.display = 'none';
+            $('posterArea').style.display = 'flex';
+            $('saveDialog').style.display = 'none';
+            $('fileDropdown').classList.remove('show');
+            $('m1Feedback').className = 'feedback-banner';
+            $('m1Feedback').textContent = '';
+            $('m1Instruction').textContent = '任務 1：點擊裝飾，為農曆新年海報設計內容！（至少 2 個）';
+            // reset format UI
+            selectedFormat = 'docx';
+            $('fmtDocx').classList.add('selected');
+            $('fmtTxt').classList.remove('selected');
+            $('filenameInput').value = '';
+            $('filenameInput').readOnly = true;
+        }
+
+        function addSticker(emoji) {
+            playSound('click');
+            const item = document.createElement('span');
+            item.className = 'placed-item';
+            item.textContent = emoji;
+            $('placedStickers').appendChild(item);
+            stickersCount += 1;
+            if (stickersCount >= 2) {
+                $('btnGoToSave').style.display = 'inline-flex';
+                $('m1Instruction').textContent = '✨ 海報完成！請點擊「準備儲存檔案」。';
+            }
+        }
+
+        function startSaveFlow() {
+            playSound('click');
+            $('posterArea').style.display = 'none';
+            $('saveSimWindow').style.display = 'block';
+            $('m1Instruction').textContent = '步驟 1：點擊軟件頂部的「檔案 (File)」選單。';
+            setupFilenameChoices();
+        }
+
+        function setupFilenameChoices() {
+            const container = $('keyboardContainer');
+            container.innerHTML = '';
+            const config = tierConfigs[currentTier];
+            $('filenameLabel').textContent = '2. ' + config.hint;
+            const input = $('filenameInput');
+            input.value = '';
+            if (currentTier === 3) {
+                input.readOnly = false;
+                input.placeholder = '點 A/B/C，或手動輸入英文詞…';
+            } else {
+                input.readOnly = true;
+                input.placeholder = '請點選下方 A / B / C';
+            }
+            config.options.forEach(function (opt, idx) {
+                const letter = LETTERS[idx] || String(idx + 1);
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'choice-btn';
+                btn.innerHTML = '<span class="choice-letter">' + letter + '</span><span>' + opt + '</span>';
+                btn.addEventListener('click', function () {
+                    playSound('click');
+                    Array.prototype.forEach.call(container.querySelectorAll('.choice-btn'), function (b) {
+                        b.classList.remove('selected');
+                    });
+                    btn.classList.add('selected');
+                    input.value = opt;
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        function clickFileMenu() {
+            playSound('click');
+            $('fileDropdown').classList.toggle('show');
+            $('menuFile').classList.remove('pulse-hint');
+            $('m1Instruction').textContent = '步驟 2：在下拉選單點擊「另存新檔 (Save As)」。';
+        }
+
+        function clickSaveAs() {
+            playSound('click');
+            $('fileDropdown').classList.remove('show');
+            $('saveDialog').style.display = 'block';
+            $('m1Instruction').textContent = '步驟 3：格式選 A（.docx），再選正確檔案名稱，然後確認儲存。';
+        }
+
+        function selectFormat(fmt, btn) {
+            playSound('click');
+            selectedFormat = fmt;
+            $('fmtDocx').classList.toggle('selected', fmt === 'docx');
+            $('fmtTxt').classList.toggle('selected', fmt === 'txt');
+            if (btn) {
+                // keep A/B visual already via ids
+            }
+        }
+
+        function isFilenameValid(name) {
+            const config = tierConfigs[currentTier];
+            if (!name) return false;
+            if (config.mode === 'exact') {
+                return name === config.target;
+            }
+            // high: any preset option OR custom English word 2+ letters
+            if (config.options.indexOf(name) !== -1) return true;
+            return /^[A-Za-z]{2,20}$/.test(name);
+        }
+
+        function confirmSave() {
+            const inputVal = $('filenameInput').value.trim();
+            const feedback = $('m1Feedback');
+
+            if (selectedFormat !== 'docx') {
+                playSound('error');
+                bumpMistake();
+                feedback.className = 'feedback-banner error';
+                feedback.textContent = '⚠️ 文書檔案格式應該選擇 A「.docx」！';
+                return;
+            }
+            if (!inputVal) {
+                playSound('error');
+                bumpMistake();
+                feedback.className = 'feedback-banner error';
+                feedback.textContent = '⚠️ 請選擇或輸入檔案名稱！';
+                return;
+            }
+            if (!isFilenameValid(inputVal)) {
+                playSound('error');
+                bumpMistake();
+                feedback.className = 'feedback-banner error';
+                const cfg = tierConfigs[currentTier];
+                if (cfg.mode === 'exact') {
+                    feedback.textContent = '⚠️ 檔案名稱不正確。請選擇「' + cfg.target + '」。';
+                } else {
+                    feedback.textContent = '⚠️ 請用英文字母詞（例如 Poster），至少 2 個字母。';
+                }
+                return;
+            }
+
+            playSound('success');
+            savedFilename = inputVal + '.docx';
+            feedback.className = 'feedback-banner success';
+            feedback.textContent = '🎉 成功儲存！檔案名稱：' + savedFilename;
+            setStars(1);
+            setTimeout(goToModule2, 1200);
+        }
+
+        function updateMethodChips() {
+            const c1 = $('chipM1');
+            const c2 = $('chipM2');
+            c1.className = 'method-chip' + (method1Done ? ' done' : (openStep === 1 ? ' now' : ''));
+            c2.className = 'method-chip' + (method2Done ? ' done' : (openStep === 2 ? ' now' : ''));
+            c1.textContent = method1Done ? '✓ 方法一 檔案總管' : '方法一 檔案總管';
+            c2.textContent = method2Done ? '✓ 方法二 先開軟件' : '方法二 先開軟件';
+        }
+
+        function goToModule2() {
+            showPanel('module2Panel');
+            method1Done = false;
+            method2Done = false;
+            openStep = 1;
+            $('method1Sim').style.display = 'block';
+            $('method2Sim').style.display = 'none';
+            $('m2Feedback').className = 'feedback-banner';
+            $('m2Feedback').textContent = '';
+            $('m2Instruction').textContent = '任務 2（方法一）：在檔案總管點擊剛才儲存的檔案開啟！';
+            updateMethodChips();
+            buildExplorer();
+        }
+
+        function buildExplorer() {
+            const grid = $('explorerGrid');
+            grid.innerHTML = '';
+            const items = [
+                { letter: 'A', icon: '📁', name: '我的圖片', kind: 'folder' },
+                { letter: 'B', icon: '📁', name: '功課資料夾', kind: 'folder' },
+                { letter: 'C', icon: '📄', name: 'song.mp3', kind: 'wrong' },
+                { letter: 'D', icon: '📄', name: savedFilename, kind: 'target' }
+            ];
+            items.forEach(function (it) {
+                const div = document.createElement('div');
+                div.className = 'file-item' + (it.kind === 'target' ? ' pulse-hint' : '');
+                div.innerHTML =
+                    '<span class="file-letter">' + it.letter + '</span>' +
+                    '<div class="file-icon">' + it.icon + '</div>' +
+                    '<div class="file-name">' + it.name + '</div>';
+                div.addEventListener('click', function () {
+                    handleExplorerClick(it.kind, it.name);
+                });
+                grid.appendChild(div);
+            });
+        }
+
+        function handleExplorerClick(kind) {
+            const fb = $('m2Feedback');
+            if (kind === 'target') {
+                playSound('success');
+                method1Done = true;
+                fb.className = 'feedback-banner success';
+                fb.textContent = '🎉 方法一完成！用檔案總管成功開啟。';
+                setStars(method2Done ? 3 : 2);
+                updateMethodChips();
+                setTimeout(startMethod2, 1100);
+                return;
+            }
+            playSound('error');
+            bumpMistake();
+            fb.className = 'feedback-banner error';
+            if (kind === 'folder') {
+                fb.textContent = '⚠️ 這是資料夾，不是海報檔案。請選有 .docx 的檔案。';
+            } else {
+                fb.textContent = '⚠️ 這不是剛才儲存的海報。請選「' + savedFilename + '」。';
+            }
+        }
+
+        function startMethod2() {
+            openStep = 2;
+            $('method1Sim').style.display = 'none';
+            $('method2Sim').style.display = 'block';
+            $('m2FileDropdown').classList.remove('show');
+            $('m2OpenDialog').style.display = 'none';
+            $('m2AppStatus').style.display = 'block';
+            $('m2AppStatus').textContent = '請先點擊頂部的「檔案」選單…';
+            $('m2MenuFile').classList.add('pulse-hint');
+            $('m2Instruction').textContent = '任務 2（方法二）：先開啟文書處理軟件，再開啟檔案。';
+            $('m2Feedback').className = 'feedback-banner';
+            $('m2Feedback').textContent = '';
+            updateMethodChips();
+            buildM2OpenGrid();
+        }
+
+        function buildM2OpenGrid() {
+            const grid = $('m2OpenGrid');
+            grid.innerHTML = '';
+            const items = [
+                { letter: 'A', icon: '📄', name: 'notes.txt', kind: 'wrong' },
+                { letter: 'B', icon: '📄', name: savedFilename, kind: 'target' },
+                { letter: 'C', icon: '📁', name: '下載', kind: 'folder' }
+            ];
+            items.forEach(function (it) {
+                const div = document.createElement('div');
+                div.className = 'file-item' + (it.kind === 'target' ? ' pulse-hint' : '');
+                div.innerHTML =
+                    '<span class="file-letter">' + it.letter + '</span>' +
+                    '<div class="file-icon">' + it.icon + '</div>' +
+                    '<div class="file-name">' + it.name + '</div>';
+                div.addEventListener('click', function () {
+                    handleM2OpenClick(it.kind);
+                });
+                grid.appendChild(div);
+            });
+        }
+
+        function clickM2FileMenu() {
+            playSound('click');
+            $('m2FileDropdown').classList.add('show');
+            $('m2MenuFile').classList.remove('pulse-hint');
+            $('m2Instruction').textContent = '請點擊「開啟舊檔 (Open)」。';
+        }
+
+        function clickM2OpenOpt() {
+            playSound('click');
+            $('m2FileDropdown').classList.remove('show');
+            $('m2AppStatus').style.display = 'none';
+            $('m2OpenDialog').style.display = 'block';
+            $('m2Instruction').textContent = '請選擇要開啟的海報檔案（' + savedFilename + '）。';
+        }
+
+        function handleM2OpenClick(kind) {
+            const fb = $('m2Feedback');
+            if (kind === 'target') {
+                playSound('success');
+                method2Done = true;
+                fb.className = 'feedback-banner success';
+                fb.textContent = '🎉 方法二完成！兩種開啟方法都學會了。';
+                setStars(3);
+                updateMethodChips();
+                setTimeout(goToShowcase, 1100);
+                return;
+            }
+            playSound('error');
+            bumpMistake();
+            fb.className = 'feedback-banner error';
+            fb.textContent = '⚠️ 請選擇「' + savedFilename + '」開啟。';
+        }
+
+        function goToShowcase() {
+            showPanel('showcasePanel');
+            $('showcaseFileText').textContent = '檔案名稱：' + savedFilename;
+            const src = $('posterCanvas');
+            const dst = $('showcasePoster');
+            dst.innerHTML = src.innerHTML;
+            $('studentName').value = '';
+        }
+
+        function goToCert() {
+            playSound('success');
+            const name = ($('studentName').value || '').trim() || '同學';
+            studentLabel = name;
+            const m = medalFromMistakes();
+            $('endMedal').textContent = m.medal;
+            $('endTitle').textContent = m.title;
+            $('endName').textContent = studentLabel;
+            $('endDetail').textContent = '檔案：' + savedFilename + ' · 錯誤 ' + mistakeCount + ' 次';
+            setStars(m.stars);
+            showPanel('victoryPanel');
+        }
+
+        function printCert() {
+            playSound('click');
+            const root = $('cert-print-root');
+            const m = medalFromMistakes();
+            root.innerHTML =
+                '<img src="assets/puichi-logo.png" alt="將軍澳培智學校" width="72" height="72">' +
+                '<div class="medal">' + (m.medal) + '</div>' +
+                '<div class="title">' + (m.title) + '</div>' +
+                '<div class="meta">' + studentLabel + '</div>' +
+                '<div class="meta">檔案：' + savedFilename + '</div>' +
+                '<div class="meta">已掌握：另存新檔（.docx）＋兩種開啟方法</div>' +
+                '<div class="meta">儲存檔案教學 · 將軍澳培智學校電腦科</div>';
+            window.print();
+        }
+
+        // exports for inline handlers
+        window.selectTier = selectTier;
+        window.resetToHome = resetToHome;
+        window.addSticker = addSticker;
+        window.startSaveFlow = startSaveFlow;
+        window.clickFileMenu = clickFileMenu;
+        window.clickSaveAs = clickSaveAs;
+        window.selectFormat = selectFormat;
+        window.confirmSave = confirmSave;
+        window.clickM2FileMenu = clickM2FileMenu;
+        window.clickM2OpenOpt = clickM2OpenOpt;
+        window.goToCert = goToCert;
+        window.printCert = printCert;
+    })();
+    </script>
+</body>
+</html>
